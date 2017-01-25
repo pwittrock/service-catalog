@@ -1,0 +1,8 @@
+apiVersion: servicecatalog.k8s.io/v1alpha1
+kind: ServiceClass
+metadata:
+  name: test-broker
+spec:
+  brokerName: test-broker
+  bindable: true
+
