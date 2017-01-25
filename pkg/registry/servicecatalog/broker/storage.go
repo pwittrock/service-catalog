@@ -19,6 +19,8 @@ package broker
 import (
 	"fmt"
 
+	"github.com/golang/glog"
+
 	"k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/api/rest"
 	"k8s.io/kubernetes/pkg/fields"
@@ -61,6 +63,20 @@ func GetAttrs(obj runtime.Object) (labels.Set, fields.Set, error) {
 func NewStorage(opts generic.RESTOptions) rest.Storage {
 	prefix := "/" + opts.ResourcePrefix
 
+	glog.Infof("HERE opts=%#v", opts)
+
+	newListFunc := func() runtime.Object { return &servicecatalog.BrokerList{} }
+	storageInterface, dFunc := opts.Decorator(
+		opts.StorageConfig,
+		1000,
+		&servicecatalog.Broker{},
+		prefix,
+		brokerRESTStrategies,
+		newListFunc,
+		nil,
+		storage.NoTriggerPublisher,
+	)
+
 	store := registry.Store{
 		NewFunc: func() runtime.Object {
 			return &servicecatalog.Broker{}
@@ -91,6 +107,9 @@ func NewStorage(opts generic.RESTOptions) rest.Storage {
 		CreateStrategy: brokerRESTStrategies,
 		UpdateStrategy: brokerRESTStrategies,
 		DeleteStrategy: brokerRESTStrategies,
+
+		Storage:     storageInterface,
+		DestroyFunc: dFunc,
 	}
 
 	return &store
