@@ -98,7 +98,8 @@ $(BINDIR)/apiserver: .init .generate_files cmd/apiserver $(NEWEST_GO_FILE)
 #################################################
 .generate_exes: $(BINDIR)/defaulter-gen \
                 $(BINDIR)/deepcopy-gen \
-                $(BINDIR)/conversion-gen
+                $(BINDIR)/conversion-gen \
+				$(BINDIR)/openapi-gen
 	touch $@
 
 $(BINDIR)/defaulter-gen: .init cmd/libs/go2idl/defaulter-gen
@@ -108,6 +109,9 @@ $(BINDIR)/deepcopy-gen: .init cmd/libs/go2idl/deepcopy-gen
 	$(DOCKER_CMD) go build -o $@ $(SC_PKG)/cmd/libs/go2idl/deepcopy-gen
 
 $(BINDIR)/conversion-gen: cmd/libs/go2idl/conversion-gen
+	$(DOCKER_CMD) go build -o $@ $(SC_PKG)/$^
+
+$(BINDIR)/openapi-gen: cmd/libs/go2idl/openapi-gen
 	$(DOCKER_CMD) go build -o $@ $(SC_PKG)/$^
 
 # Regenerate all files if the gen exes changed or any "types.go" files changed
